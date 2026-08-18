@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>육군 장교 급여계산기 (소위·중위·대위)</title>
+<meta property="og:title" content="육군 장교 급여계산기 (소위·중위·대위)">
+<meta name="twitter:title" content="육군 장교 급여계산기 (소위·중위·대위)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700;900&family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf7ef;
+    --paper-2:#f3efe2;
+    --ink:#232821;
+    --muted:#6f7566;
+    --line:#ddd6c2;
+    --forest:#1f3a2c;
+    --forest-2:#2b4d3a;
+    --gold:#a9843f;
+    --gold-soft:#f1e9d3;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    min-height:100vh;
+    padding:0 0 80px;
+  }
+  a{color:inherit;}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:46px 24px 38px;
+    text-align:center;
+    background:var(--forest);
+    border-bottom:4px solid var(--gold);
+  }
+  .crest{
+    width:56px;height:56px;
+    margin:0 auto 16px;
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .crest svg{width:26px;height:26px;fill:var(--gold);}
+  .eyebrow{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.28em;
+    color:var(--gold-soft);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight:700;
+    font-size:clamp(26px, 4.6vw, 38px);
+    margin:0 0 10px;
+    color:#ffffff;
+    letter-spacing:0.01em;
+  }
+  .subhead{
+    color:#d9e2d6;
+    font-size:14px;
+    max-width:560px;
+    margin:0 auto;
+    line-height:1.75;
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width:1080px;
+    margin:0 auto;
+    padding:36px 20px 0;
+    display:grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    main{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:26px 24px 30px;
+  }
+
+  .panel-title{
+    font-family:'Noto Serif KR', serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--forest);
+    margin-bottom:20px;
+    padding-bottom:12px;
+    border-bottom:1.5px solid var(--gold);
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .panel-title .roman{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--gold);
+    font-weight:700;
+  }
+
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .field .hint{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+    line-height:1.55;
+  }
+  select, input[type="number"]{
+    width:100%;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:14.5px;
+    padding:10px 12px;
+    border-radius:4px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  select:focus, input[type="number"]:focus{
+    border-color:var(--gold);
+  }
+
+  .check-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
+  .check-item{
+    display:flex; align-items:center; gap:9px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    cursor:pointer;
+    font-size:13.5px;
+  }
+  .check-item input{accent-color:var(--forest);}
+  .check-item.full{grid-column:1 / -1;}
+
+  /* ---------- Result / payslip ---------- */
+  .slip{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .slip-head{
+    padding:20px 24px;
+    background:var(--forest);
+    border-bottom:3px solid var(--gold);
+  }
+  .slip-head .label{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.18em;
+    color:var(--gold-soft);
+    text-transform:uppercase;
+  }
+  .slip-head .rank-line{
+    font-family:'Noto Serif KR', serif;
+    font-size:21px;
+    font-weight:700;
+    color:#ffffff;
+    margin-top:5px;
+  }
+
+  .ledger{padding:16px 24px 4px;}
+  .ledger-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px solid var(--paper-2);
+    font-size:14px;
+  }
+  .ledger-row .name{color:var(--muted);}
+  .ledger-row .val{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .total-block{
+    margin:20px 24px 24px;
+    background:var(--gold-soft);
+    border:1.5px solid var(--gold);
+    border-radius:6px;
+    padding:18px 20px;
+    display:flex; justify-content:space-between; align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .total-block .t-label{
+    font-family:'Noto Serif KR', serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--forest);
+  }
+  .total-block .t-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:26px;
+    font-weight:700;
+    color:var(--forest);
+  }
+  .total-block .t-value span{font-size:14px; color:var(--muted); font-weight:500; margin-left:4px;}
+
+  .annual-note{
+    margin:0 24px 22px;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.75;
+    padding:14px 16px;
+    background:var(--paper-2);
+    border-left:3px solid var(--forest);
+    border-radius:2px;
+  }
+  .annual-note b{color:var(--forest);}
+
+  footer{
+    max-width:1080px;
+    margin:44px auto 0;
+    padding:0 20px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.8;
+    text-align:center;
+  }
+  footer .disclaimer{
+    max-width:680px;
+    margin:0 auto 14px;
+    padding:16px 18px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--white);
+    text-align:left;
+  }
+  footer .credit{color:var(--muted); font-weight:600;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">
+    <svg viewBox="0 0 24 24"><path d="M12 2 L14.5 9 L22 9.5 L16 14.2 L18 21.5 L12 17.3 L6 21.5 L8 14.2 L2 9.5 L9.5 9 Z"/></svg>
+  </div>
+  <div class="eyebrow">R.O.K. ARMY OFFICER · 2026</div>
+  <h1>육군 장교 급여계산기</h1>
+  <p class="subhead">소위·중위·대위 계급을 대상으로, 2026년 군인 봉급표와 공무원수당 등에 관한 규정을 기준으로<br>계급·호봉·직책·근무여건을 입력하면 예상 월 급여를 계산합니다.</p>
+</header>
+
+<main>
+  <!-- INPUT PANEL -->
+  <section class="panel">
+    <div class="panel-title"><span class="roman">I</span>계급 및 호봉</div>
+
+    <div class="field">
+      <label for="rank">계급</label>
+      <select id="rank">
+        <option value="소위">소위</option>
+        <option value="중위">중위</option>
+        <option value="대위">대위</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="step">호봉</label>
+      <select id="step"></select>
+      <div class="hint">계급을 바꾸면 선택 가능한 호봉 범위가 자동으로 조정됩니다.</div>
+    </div>
+
+    <div class="field">
+      <label for="years">근속연수 (정근수당 산정 기준, 년)</label>
+      <input type="number" id="years" min="0" max="30" value="2">
+      <div class="hint">정근수당·정근수당가산금은 1월·7월에 연 2회 지급되며, 아래 결과에는 월 평균 환산액이 표시됩니다.</div>
+    </div>
+
+    <div class="panel-title" style="margin-top:28px;"><span class="roman">II</span>보직 및 근무 여건</div>
+
+    <div class="field">
+      <label for="duty">직책수당</label>
+      <select id="duty">
+        <option value="0">해당 직책 없음</option>
+        <option value="70000">소대장급 — 월 70,000원</option>
+        <option value="130000">중대장급 — 월 130,000원</option>
+        <option value="200000">대대 참모·작전장교급 — 월 200,000원</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="remote">특수지근무수당 등급</label>
+      <select id="remote">
+        <option value="0">해당 없음 (후방·시내 지역)</option>
+        <option value="30000">3급지 — 월 30,000원</option>
+        <option value="45000">2급지 — 월 45,000원</option>
+        <option value="60000">1급지 — 월 60,000원 (최전방 접적지역)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="ot">초과근무수당 (부대 유형별 월 근무시간)</label>
+      <select id="ot">
+        <option value="57">일반부대 — 월 57시간</option>
+        <option value="150">GOP — 월 150시간</option>
+        <option value="200">GP — 월 200시간</option>
+      </select>
+      <div class="hint">2026년 국군재정관리단 장교 시간외근무수당 단가 기준 (소위 11,198원/시간, 중위 12,327원/시간, 대위 14,857원/시간)으로 계산됩니다.</div>
+    </div>
+
+    <div class="check-grid">
+      <label class="check-item"><input type="checkbox" id="hazard"> 위험근무수당 대상</label>
+      <label class="check-item"><input type="checkbox" id="housing" checked> 주택수당 대상 (영외 거주)</label>
+      <label class="check-item full"><input type="checkbox" id="meal" checked> 영외급식비</label>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <label for="leaveDays">연가보상일수 (연가보상비 산정, 일)</label>
+      <input type="number" id="leaveDays" min="0" max="20" value="10">
+      <div class="hint">연가보상비 = 월 봉급액 × 86% × 1/30 × 보상일수. 급여명세서 하단 "연간 특별지급"에 별도 표시됩니다.</div>
+    </div>
+
+    <div class="panel-title" style="margin-top:28px;"><span class="roman">III</span>가족 사항</div>
+    <div class="check-grid">
+      <label class="check-item"><input type="checkbox" id="spouse"> 배우자</label>
+      <div class="field" style="margin:0;">
+        <label for="kids" style="font-size:12.5px; margin-bottom:6px;">자녀 수</label>
+        <input type="number" id="kids" min="0" max="6" value="0">
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label for="etc" style="font-size:12.5px;">기타 부양가족 수 (부모 등, 최대 4인)</label>
+      <input type="number" id="etc" min="0" max="4" value="0">
+    </div>
+  </section>
+
+  <!-- RESULT PANEL -->
+  <section class="slip">
+    <div class="slip-head">
+      <div class="label">Estimated Pay Slip</div>
+      <div class="rank-line" id="rankLine">소위 1호봉</div>
+    </div>
+
+    <div class="ledger" id="ledger">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="total-block">
+      <div class="t-label">월 예상 수령액 (세전)</div>
+      <div class="t-value" id="totalValue">0<span>원</span></div>
+    </div>
+
+    <div class="annual-note" id="annualNote"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="disclaimer">
+    본 계산기는 2026년 「군인의 봉급표」(공무원보수규정) 및 「공무원수당 등에 관한 규정」의 공개된 기준을 참고하여 제작한 <b>비공식 참고용 도구</b>입니다. 실제 지급액은 소속 부대, 호봉 획정, 개인별 공제 항목(소득세·군인연금 기여금·건강보험료 등)에 따라 달라질 수 있으며, 성과상여금 등은 반영되지 않았습니다. 명절휴가비·연가보상비는 급여명세서 하단 "연간 특별지급" 항목에 별도 표시됩니다. 정확한 급여는 소속 부대 인사/재정 담당자를 통해 확인하시기 바랍니다.
+  </div>
+  <div class="credit">© 육군 장교 급여계산기 (소위·중위·대위)</div>
+</footer>
+
+<script>
+// ---- 2026년 장교 봉급표 (원, 월 기본급) ----
+const PAY_TABLE = {
+  "소위": [2150400,2240400,2330400],
+  "중위": [2306700,2385000,2463300,2541600,2619900,2741300,2862700],
+  "대위": [2805000,2922900,3040800,3185400,3330000,3474600,3619200,3763800,3908400,4053000,4197600,4342200]
+};
+
+// 2026년 국군재정관리단 장교 시간외근무수당 단가 (원/시간)
+const OT_RATE = {
+  "소위": 11198,
+  "중위": 12327,
+  "대위": 14857
+};
+
+const won = n => Math.round(n).toLocaleString('ko-KR');
+
+function populateSteps(){
+  const rank = document.getElementById('rank').value;
+  const stepSel = document.getElementById('step');
+  const steps = PAY_TABLE[rank];
+  stepSel.innerHTML = steps.map((v,i)=>`<option value="${i}">${i+1}호봉</option>`).join('');
+}
+
+function familyAllowance(spouse, kids, etc){
+  let total = 0;
+  if(spouse) total += 40000;
+  for(let i=1;i<=kids;i++){
+    if(i===1) total += 50000;
+    else if(i===2) total += 80000;
+    else total += 120000;
+  }
+  total += Math.min(etc,4) * 20000;
+  return total;
+}
+
+function longevityRate(years){
+  if(years < 1) return 0;
+  const rate = Math.min(years,10) * 5;
+  return rate/100;
+}
+
+function longevityBonus(years){
+  if(years >= 10) return 100000;
+  if(years >= 5) return 50000;
+  return 0;
+}
+
+function calculate(){
+  const rank = document.getElementById('rank').value;
+  const stepIdx = parseInt(document.getElementById('step').value);
+  const years = Math.max(0, parseInt(document.getElementById('years').value)||0);
+  const duty = parseInt(document.getElementById('duty').value);
+  const remote = parseInt(document.getElementById('remote').value);
+  const otHours = parseInt(document.getElementById('ot').value);
+  const hazard = document.getElementById('hazard').checked;
+  const housing = document.getElementById('housing').checked;
+  const meal = document.getElementById('meal').checked;
+  const spouse = document.getElementById('spouse').checked;
+  const kids = Math.max(0, parseInt(document.getElementById('kids').value)||0);
+  const etc = Math.max(0, parseInt(document.getElementById('etc').value)||0);
+  const leaveDays = Math.max(0, parseInt(document.getElementById('leaveDays').value)||0);
+
+  const base = PAY_TABLE[rank][stepIdx];
+
+  const longRate = longevityRate(years);
+  const longevityAnnual = base * longRate * 2;
+  const longevityMonthlyAvg = longevityAnnual / 12;
+  const longBonusMonthly = longevityBonus(years);
+
+  const family = familyAllowance(spouse, kids, etc);
+  const housingAmt = housing ? 160000 : 0;
+  const hazardAmt = hazard ? 60000 : 0;
+  const mealAmt = meal ? 140000 : 0;
+  const otAmt = OT_RATE[rank] * otHours;
+  const otLabel = otHours===57 ? '일반부대' : (otHours===150 ? 'GOP' : 'GP');
+
+  const items = [
+    {name:'기본급', val: base},
+    {name:'정근수당 (월 평균 환산)', val: longevityMonthlyAvg},
+    {name:'정근수당가산금', val: longBonusMonthly},
+    {name:'직책수당', val: duty},
+    {name:'특수지근무수당', val: remote},
+    {name:`초과근무수당 (${otLabel} · 월 ${otHours}시간)`, val: otAmt},
+    {name:'위험근무수당', val: hazardAmt},
+    {name:'주택수당', val: housingAmt},
+    {name:'가족수당', val: family},
+    {name:'영외급식비', val: mealAmt},
+  ];
+
+  const monthlyTotal = items.reduce((s,i)=>s+i.val,0);
+
+  const holidayBonusPerPayment = base * 0.6;
+  const holidayBonusAnnual = holidayBonusPerPayment * 2;
+  const leaveCompPayment = base * 0.86 * (1/30) * leaveDays;
+  const annualEstimate = monthlyTotal*12 + holidayBonusAnnual + leaveCompPayment;
+
+  document.getElementById('rankLine').textContent = `${rank} ${stepIdx+1}호봉`;
+  const ledger = document.getElementById('ledger');
+  ledger.innerHTML = items.map(i=>`
+    <div class="ledger-row">
+      <span class="name">${i.name}</span>
+      <span class="val">${won(i.val)}원</span>
+    </div>`).join('');
+
+  document.getElementById('totalValue').innerHTML = `${won(monthlyTotal)}<span>원</span>`;
+  document.getElementById('annualNote').innerHTML =
+    `<b>연간 특별지급</b><br>
+     · 명절휴가비 (설·추석 각 1회, 봉급액×60%): 1회 <b>${won(holidayBonusPerPayment)}원</b> · 연 2회 합계 <b>${won(holidayBonusAnnual)}원</b><br>
+     · 연가보상비 (봉급액×86%×1/30×${leaveDays}일): <b>${won(leaveCompPayment)}원</b><br><br>
+     연간 예상 총액(월 급여×12 + 명절휴가비 + 연가보상비 포함): <b>${won(annualEstimate)}원</b><br>
+     ※ 성과상여금, 진급 시 호봉 재산정 등은 반영되지 않았습니다.`;
+}
+
+document.getElementById('rank').addEventListener('change', ()=>{ populateSteps(); calculate(); });
+['step','years','duty','remote','ot','hazard','housing','meal','spouse','kids','etc','leaveDays']
+  .forEach(id => document.getElementById(id).addEventListener('input', calculate));
+
+populateSteps();
+calculate();
+</script>
+
+</body>
+</html>
